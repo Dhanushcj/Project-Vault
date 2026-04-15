@@ -1,0 +1,12 @@
+const mongoose = require('mongoose');
+
+const videoSchema = new mongoose.Schema({
+  projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
+  videoUrl: { type: String, required: true }, // YouTube, Loom, etc.
+  title: { type: String },
+  description: { type: String },
+  uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  createdAt: { type: Date, default: Date.now },
+});
+
+module.exports = mongoose.model('Video', videoSchema);
