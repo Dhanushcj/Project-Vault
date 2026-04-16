@@ -40,7 +40,7 @@ app.use('/uploads', express.static('uploads'));
 // MongoDB Connection Cache for Serverless
 let cached = global.mongoose;
 if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+  cached = global.mongoose = { conn: null, promise: null, lastError: null };
 }
 
 const connectDB = async () => {
@@ -69,14 +69,15 @@ const connectDB = async () => {
 
   try {
     cached.conn = await cached.promise;
+    cached.lastError = null;
     await seedAdmin();
   } catch (err) {
     cached.promise = null; // Reset promise so we can retry on next request
+    cached.lastError = err.message;
     console.error('Critical MongoDB connection error:', err.message);
     if (err.stack) console.error(err.stack);
     
     if (process.env.NODE_ENV === 'production') {
-      // In Vercel, we want to see the error in the logs but not necessarily crash the whole runtime
       return null;
     }
   }
@@ -115,7 +116,9 @@ app.use(async (req, res, next) => {
     const conn = await connectDB();
     if (!conn && process.env.NODE_ENV === 'production') {
       return res.status(503).json({ 
-        message: 'Database connection is still initializing or failed. Please try again in a moment.' 
+        message: 'Database connection failed.',
+        error: cached.lastError || 'Initialization timeout',
+        tip: 'Check your MONGODB_URI and IP Whitelist on Atlas.'
       });
     }
     next();
