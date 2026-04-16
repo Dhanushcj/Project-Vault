@@ -125,14 +125,14 @@ export default function ProjectsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Project Vaults</h1>
-          <p className="text-sm text-gray-600">Each project stores credentials, working videos, and deployment links in one place.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Project Vaults</h1>
+          <p className="text-xs sm:text-sm text-gray-600 max-w-xl">Each project stores credentials, working videos, and deployment links in one place.</p>
         </div>
         {user && (
-          <Link href="/projects/new">
-            <Button>
+          <Link href="/projects/new" className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               New Project
             </Button>
@@ -141,18 +141,17 @@ export default function ProjectsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search projects..."
+              placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
             />
           </div>
-
           <select
             aria-label="Filter projects by status"
             value={statusFilter}
@@ -164,15 +163,14 @@ export default function ProjectsPage() {
             <option value="completed">Completed</option>
             <option value="maintenance">Maintenance</option>
           </select>
-
           <Input
-            placeholder="Filter by tech stack..."
+            placeholder="Tech stack..."
             value={techFilter === 'all' ? '' : techFilter}
             onChange={(e) => setTechFilter(e.target.value || 'all')}
           />
-
           <Button
             variant="outline"
+            className="w-full"
             onClick={() => {
               setSearchTerm('');
               setStatusFilter('all');
@@ -180,7 +178,7 @@ export default function ProjectsPage() {
             }}
           >
             <Filter className="h-4 w-4 mr-2" />
-            Clear Filters
+            Clear
           </Button>
         </div>
       </div>

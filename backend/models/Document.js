@@ -12,4 +12,4 @@ const documentSchema = new mongoose.Schema({
 
 documentSchema.index({ brand: 1 });
 
-module.exports = mongoose.model('Document', documentSchema);
+module.exports = mongoose.models.Document || mongoose.model('Document', documentSchema);

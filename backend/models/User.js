@@ -12,4 +12,4 @@ const userSchema = new mongoose.Schema({
 
 userSchema.index({ brand: 1 });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.models.User || mongoose.model('User', userSchema);

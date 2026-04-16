@@ -126,13 +126,13 @@ export default function TeamManagementPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="bg-purple-600 rounded-lg shadow-lg p-8 text-white">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Users className="h-12 w-12 text-white/90" />
+      <div className="bg-purple-600 rounded-lg shadow-lg p-4 sm:p-8 text-white">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <Users className="h-8 w-8 sm:h-12 sm:w-12 text-white/90 shrink-0" />
             <div>
-              <h1 className="text-3xl font-bold">Team Management</h1>
-              <p className="text-purple-100 mt-2">
+              <h1 className="text-xl sm:text-3xl font-bold">Team Management</h1>
+              <p className="text-xs sm:text-purple-100 mt-1">
                 Onboard new employees and manage your company team directory.
               </p>
             </div>
@@ -153,9 +153,9 @@ export default function TeamManagementPage() {
         {/* Left Col: Employee Directory */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-card rounded-lg shadow border border-border overflow-hidden">
-            <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4 bg-muted/30">
-              <h2 className="text-xl font-semibold flex items-center">
-                <UserCheck className="h-6 w-6 mr-2 text-purple-500" /> 
+            <div className="p-4 sm:p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4 bg-muted/30">
+              <h2 className="text-lg sm:text-xl font-semibold flex items-center">
+                <UserCheck className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-purple-500" /> 
                 Employee Directory ({employees.length})
               </h2>
               <div className="relative">

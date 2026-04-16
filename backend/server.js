@@ -29,13 +29,26 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/projectdb')
-  .then(async () => {
+const connectDB = async () => {
+  if (mongoose.connection.readyState >= 1) return;
+  try {
+    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/projectdb';
+    if (!process.env.MONGO_URI && process.env.NODE_ENV === 'production') {
+      console.warn('MONGO_URI is not defined in production environment');
+    }
+    await mongoose.connect(mongoUri);
     console.log('MongoDB connected');
     await seedAdmin();
-  })
-  .catch(err => console.error('MongoDB connection error:', err));
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+    if (process.env.NODE_ENV === 'production') {
+      throw err; // Fail hard in production
+    }
+  }
+};
+
+// Initial connection attempt
+connectDB();
 
 async function seedAdmin() {
   try {
@@ -75,8 +88,17 @@ app.use('/api/documents', documentsRouter);
 app.use('/api/activity', activityRouter);
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+app.get('/api/health', async (req, res) => {
+  try {
+    await connectDB();
+    res.json({ 
+      status: 'OK', 
+      dbConnected: mongoose.connection.readyState === 1,
+      timestamp: new Date().toISOString() 
+    });
+  } catch (err) {
+    res.status(500).json({ status: 'ERROR', message: err.message });
+  }
 });
 
 // 404 handler
@@ -86,4 +108,9 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+module.exports = app;

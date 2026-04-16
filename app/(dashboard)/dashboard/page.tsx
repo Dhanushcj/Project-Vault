@@ -78,12 +78,12 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
-      <div className="bg-card rounded-lg shadow p-6 border border-border">
-        <h1 className="text-2xl font-bold text-foreground">
+      <div className="bg-card rounded-lg shadow p-4 sm:p-6 border border-border">
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">
           Welcome to your Project Vault, {user?.name}!
         </h1>
-        <p className="text-muted-foreground mt-1">
-          Keep each company project in one folder with credentials, working videos, and Git/deployed links.
+        <p className="text-sm text-muted-foreground mt-1">
+          Keep each company project in one folder with credentials, working videos, and links.
         </p>
       </div>
 

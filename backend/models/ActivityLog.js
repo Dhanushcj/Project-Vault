@@ -17,4 +17,4 @@ activityLogSchema.index({ entityType: 1 });
 activityLogSchema.index({ userId: 1 });
 activityLogSchema.index({ brand: 1 });
 
-module.exports = mongoose.model('ActivityLog', activityLogSchema);
+module.exports = mongoose.models.ActivityLog || mongoose.model('ActivityLog', activityLogSchema);

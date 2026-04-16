@@ -15,4 +15,4 @@ const credentialSchema = new mongoose.Schema({
 credentialSchema.index({ projectId: 1 });
 credentialSchema.index({ brand: 1 });
 
-module.exports = mongoose.model('Credential', credentialSchema);
+module.exports = mongoose.models.Credential || mongoose.model('Credential', credentialSchema);
