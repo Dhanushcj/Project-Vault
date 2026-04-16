@@ -265,7 +265,7 @@ export default function ProjectDetailPage() {
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Tech Stack</h2>
         <div className="flex flex-wrap gap-2">
-          {project.techStack.map((tech) => (
+          {(project.techStack || []).map((tech) => (
             <span
               key={tech}
               className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
@@ -273,6 +273,9 @@ export default function ProjectDetailPage() {
               {tech}
             </span>
           ))}
+          {(!project.techStack || project.techStack.length === 0) && (
+            <p className="text-gray-500 text-sm italic">No tech stack specified</p>
+          )}
         </div>
       </div>
 
@@ -335,7 +338,7 @@ export default function ProjectDetailPage() {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">API Endpoints</h2>
           <div className="space-y-2">
-            {project.apiEndpoints.map((endpoint, index) => (
+            {(project.apiEndpoints || []).map((endpoint, index) => (
               <a
                 key={index}
                 href={endpoint}
@@ -357,7 +360,7 @@ export default function ProjectDetailPage() {
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Team</h2>
         <div className="flex items-center text-gray-600">
           <Users className="h-5 w-5 mr-2" />
-          <span>{project.assignedTeam.length} team members assigned</span>
+          <span>{(project.assignedTeam?.length) || 0} team members assigned</span>
         </div>
       </div>
 

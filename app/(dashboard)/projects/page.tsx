@@ -72,8 +72,8 @@ export default function ProjectsPage() {
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(project =>
-        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchTerm.toLowerCase())
+        (project.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.description?.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
@@ -85,7 +85,7 @@ export default function ProjectsPage() {
     // Tech stack filter
     if (techFilter !== 'all') {
       filtered = filtered.filter(project =>
-        project.techStack.some(tech => tech.toLowerCase().includes(techFilter.toLowerCase()))
+        project.techStack?.some(tech => tech.toLowerCase().includes(techFilter.toLowerCase())) ?? false
       );
     }
 
@@ -201,7 +201,7 @@ export default function ProjectsPage() {
             <div className="space-y-2 mb-4">
               <div className="flex items-center text-sm text-gray-500">
                 <Users className="h-4 w-4 mr-1" />
-                {project.assignedTeam.length} team members
+                {project.assignedTeam?.length || 0} team members
               </div>
               <div className="flex items-center text-sm text-gray-500">
                 <Calendar className="h-4 w-4 mr-1" />
@@ -246,7 +246,7 @@ export default function ProjectsPage() {
             </div>
 
             <div className="flex flex-wrap gap-1 mb-4">
-              {project.techStack.slice(0, 3).map((tech) => (
+              {(project.techStack || []).slice(0, 3).map((tech) => (
                 <span
                   key={tech}
                   className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-md"
@@ -254,9 +254,9 @@ export default function ProjectsPage() {
                   {tech}
                 </span>
               ))}
-              {project.techStack.length > 3 && (
+              {(project.techStack?.length ?? 0) > 3 && (
                 <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-md">
-                  +{project.techStack.length - 3} more
+                  +{(project.techStack?.length ?? 0) - 3} more
                 </span>
               )}
             </div>
