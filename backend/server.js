@@ -8,6 +8,14 @@ const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcryptjs');
 const User = require('./models/User');
 
+// Fallback for JWT_SECRET if not provided in environment
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = 'antigraviity_default_secret_2024';
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('WARNING: JWT_SECRET is not defined. Using a default fallback secret. This is NOT secure for production!');
+  }
+}
+
 const app = express();
 
 // Secure headers
