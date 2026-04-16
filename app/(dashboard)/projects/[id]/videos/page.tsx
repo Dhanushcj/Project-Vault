@@ -21,7 +21,7 @@ interface VideoDoc {
   projectId?: string;
   title: string;
   description?: string;
-  videoUrl: string;
+  url: string;
   thumbnailUrl?: string;
   duration?: number;
   uploadedBy?: string;
@@ -36,14 +36,10 @@ export default function ProjectVideosPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [formData, setFormData] = useState<{
-    title: string;
-    description: string;
-    videoFile: File | null;
-  }>({
+  const [formData, setFormData] = useState({
     title: '',
     description: '',
-    videoFile: null,
+    url: '',
   });
 
   useEffect(() => {
@@ -88,22 +84,13 @@ export default function ProjectVideosPage() {
     }
 
     try {
-      const videoFormData = new FormData();
-      videoFormData.append('projectId', projectId as string);
-      videoFormData.append('title', formData.title);
-      videoFormData.append('description', formData.description);
-      if (formData.videoFile) {
-        videoFormData.append('video', formData.videoFile);
-      }
-
-      await api.post('/videos', videoFormData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      await api.post('/videos', {
+        projectId,
+        ...formData,
       });
       toast.success('Video added successfully');
       setShowForm(false);
-      setFormData({ title: '', description: '', videoFile: null });
+      setFormData({ title: '', description: '', url: '' });
       fetchVideos();
     } catch (error: unknown) {
       const axiosError = error as { response?: { data?: { message?: string } } };
@@ -124,13 +111,11 @@ export default function ProjectVideosPage() {
   };
 
   const getVideoThumbnail = (url: string) => {
-    if (!url) return '/video-placeholder.png';
     const youtubeMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
     if (youtubeMatch) {
       return `https://img.youtube.com/vi/${youtubeMatch[1]}/maxresdefault.jpg`;
     }
-    // For local files, show the platform icon or a generic video thumbnail
-    return 'https://cdn-icons-png.flaticon.com/512/3221/3221897.png';
+    return '/video-placeholder.png';
   };
 
   const formatDuration = (seconds?: number) => {
@@ -160,8 +145,8 @@ export default function ProjectVideosPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Project Videos</h1>
-          <p className="text-muted-foreground">Upload and manage video documentation for this project.</p>
+          <h1 className="text-2xl font-bold text-gray-900">Project Videos</h1>
+          <p className="text-gray-600">Upload and manage video documentation for this project.</p>
         </div>
         <Button onClick={() => setShowForm(true)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -170,8 +155,8 @@ export default function ProjectVideosPage() {
       </div>
 
       {showForm && (
-        <div className="bg-card rounded-lg shadow p-6 border border-border">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Add New Video</h2>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Add New Video</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
@@ -186,19 +171,15 @@ export default function ProjectVideosPage() {
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
-              className="flex min-h-20 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="flex min-h-20 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             />
 
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground opacity-80">Video File</label>
-              <input
-                type="file"
-                accept="video/*"
-                onChange={(e) => setFormData({ ...formData, videoFile: e.target.files?.[0] || null })}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                required
-              />
-            </div>
+            <Input
+              placeholder="Video URL (YouTube, Vimeo, etc.)"
+              value={formData.url}
+              onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+              required
+            />
 
             <div className="flex space-x-4">
               <Button type="submit">Add Video</Button>
@@ -231,18 +212,18 @@ export default function ProjectVideosPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredVideos.map((video) => (
-          <div key={video._id} className="bg-card rounded-lg shadow-md overflow-hidden border border-border hover:shadow-lg transition-shadow">
-            <div className="relative aspect-video bg-muted">
+          <div key={video._id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+            <div className="relative aspect-video bg-gray-200">
               <Image
-                src={getVideoThumbnail(video.videoUrl)}
+                src={getVideoThumbnail(video.url)}
                 alt={video.title}
                 fill
-                className="object-cover p-8"
+                className="object-cover"
                 sizes="100vw"
               />
               <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                 <a
-                  href={video.videoUrl.startsWith('http') ? video.videoUrl : `${api.defaults.baseURL?.replace('/api', '')}${video.videoUrl}`}
+                  href={video.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`Open ${video.title} in a new tab`}
@@ -259,17 +240,17 @@ export default function ProjectVideosPage() {
             </div>
 
             <div className="p-4">
-              <h3 className="font-semibold text-foreground mb-2">{video.title}</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{video.title}</h3>
               {video.description && (
-                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{video.description}</p>
+                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{video.description}</p>
               )}
 
               <div className="flex items-center justify-between">
                 <a
-                  href={video.videoUrl.startsWith('http') ? video.videoUrl : `${api.defaults.baseURL?.replace('/api', '')}${video.videoUrl}`}
+                  href={video.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm flex items-center"
+                  className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
                 >
                   Watch Video
                   <ExternalLink className="h-3 w-3 ml-1" />
@@ -284,8 +265,8 @@ export default function ProjectVideosPage() {
                 </Button>
               </div>
 
-              <div className="mt-3 pt-3 border-t border-border">
-                <p className="text-xs text-muted-foreground">Added {new Date(video.createdAt).toLocaleDateString()}</p>
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <p className="text-xs text-gray-500">Added {new Date(video.createdAt).toLocaleDateString()}</p>
               </div>
             </div>
           </div>

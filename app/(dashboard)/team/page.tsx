@@ -13,7 +13,8 @@ import {
   Search,
   UserCheck,
   Trash2,
-  Shield
+  Shield,
+  Eye
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 

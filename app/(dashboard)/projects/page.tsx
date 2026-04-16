@@ -1,12 +1,11 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import api from '@/lib/api';
 import { canAccess } from '@/lib/auth';
-import { debounce } from '@/lib/utils';
 import {
   Plus,
   Search,
@@ -19,9 +18,7 @@ import {
   GitBranch,
   Globe,
   Shield,
-  Video,
-  ChevronLeft,
-  ChevronRight
+  Video
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -41,42 +38,26 @@ interface Project {
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [techFilter, setTechFilter] = useState<string>('all');
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
 
   const user = canAccess('developer'); // Can edit if developer or admin
 
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-
-  const updateSearch = useCallback(
-    debounce((term: string) => {
-      setDebouncedSearch(term);
-      setPage(1);
-    }, 500),
-    []
-  );
+  useEffect(() => {
+    fetchProjects();
+  }, []);
 
   useEffect(() => {
-    updateSearch(searchTerm);
-  }, [searchTerm, updateSearch]);
+    filterProjects();
+  }, [projects, searchTerm, statusFilter, techFilter]);
 
   const fetchProjects = async () => {
     try {
-      setLoading(true);
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '12',
-        status: statusFilter === 'all' ? '' : statusFilter,
-        techStack: techFilter === 'all' ? '' : techFilter,
-        name: debouncedSearch
-      });
-      const response = await api.get(`/projects?${params.toString()}`);
-      setProjects(response.data.projects);
-      setTotalPages(response.data.pages);
+      const response = await api.get('/projects');
+      setProjects(response.data);
     } catch (error) {
       console.error('Error fetching projects:', error);
       toast.error('Failed to load projects');
@@ -85,16 +66,38 @@ export default function ProjectsPage() {
     }
   };
 
-  useEffect(() => {
-    fetchProjects();
-  }, [page, statusFilter, debouncedSearch, techFilter]);
+  const filterProjects = () => {
+    let filtered = projects;
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(project =>
+        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(project => project.status === statusFilter);
+    }
+
+    // Tech stack filter
+    if (techFilter !== 'all') {
+      filtered = filtered.filter(project =>
+        project.techStack.some(tech => tech.toLowerCase().includes(techFilter.toLowerCase()))
+      );
+    }
+
+    setFilteredProjects(filtered);
+  };
 
   const deleteProject = async (id: string) => {
     if (!confirm('Are you sure you want to delete this project?')) return;
 
     try {
       await api.delete(`/projects/${id}`);
-      fetchProjects(); // Refresh current page
+      setProjects(projects.filter(p => p._id !== id));
       toast.success('Project deleted successfully');
     } catch (error) {
       console.error('Error deleting project:', error);
@@ -124,8 +127,8 @@ export default function ProjectsPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Project Vaults</h1>
-          <p className="text-sm text-muted-foreground">Each project stores credentials, working videos, and deployment links in one place.</p>
+          <h1 className="text-2xl font-bold text-gray-900">Project Vaults</h1>
+          <p className="text-sm text-gray-600">Each project stores credentials, working videos, and deployment links in one place.</p>
         </div>
         {user && (
           <Link href="/projects/new">
@@ -138,7 +141,7 @@ export default function ProjectsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-card rounded-lg shadow p-6 border border-border">
+      <div className="bg-white rounded-lg shadow p-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -154,7 +157,7 @@ export default function ProjectsPage() {
             aria-label="Filter projects by status"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="flex h-10 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -167,13 +170,13 @@ export default function ProjectsPage() {
             value={techFilter === 'all' ? '' : techFilter}
             onChange={(e) => setTechFilter(e.target.value || 'all')}
           />
+
           <Button
             variant="outline"
             onClick={() => {
               setSearchTerm('');
               setStatusFilter('all');
               setTechFilter('all');
-              setPage(1);
             }}
           >
             <Filter className="h-4 w-4 mr-2" />
@@ -184,16 +187,16 @@ export default function ProjectsPage() {
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects.map((project) => (
-          <div key={project._id} className="bg-card rounded-lg shadow-md p-6 border border-border hover:shadow-lg transition-shadow">
+        {filteredProjects.map((project) => (
+          <div key={project._id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-semibold text-foreground">{project.name}</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>
                 {project.status}
               </span>
             </div>
 
-            <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
               {project.description}
             </p>
 
@@ -303,7 +306,7 @@ export default function ProjectsPage() {
         ))}
       </div>
 
-      {projects.length === 0 && !loading && (
+      {filteredProjects.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">No projects found</p>
           {user && (
@@ -314,33 +317,6 @@ export default function ProjectsPage() {
               </Button>
             </Link>
           )}
-        </div>
-      )}
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center space-x-4 pt-8">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-          >
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Previous
-          </Button>
-          <span className="text-sm font-medium">
-            Page {page} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-          >
-            Next
-            <ChevronRight className="h-4 w-4 ml-2" />
-          </Button>
         </div>
       )}
 

@@ -196,13 +196,8 @@ export default function NewProjectPage() {
 
       router.push(`/projects/${response.data._id}?onboarding=1`);
     } catch (error: unknown) {
-      const message =
-        typeof error === 'object' &&
-        error !== null &&
-        'response' in error &&
-        typeof (error as { response?: { data?: { message?: string } } }).response?.data?.message === 'string'
-          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
-          : 'Failed to create project vault';
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      const message = axiosError.response?.data?.message || 'Failed to create project vault';
       toast.error(message);
     } finally {
       setIsLoading(false);

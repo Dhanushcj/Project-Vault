@@ -27,7 +27,7 @@ interface Project {
   description: string;
   techStack: string[];
   status: 'active' | 'completed' | 'maintenance';
-  assignedTeam: { user: { name: string; role: string }; projectRole: string }[];
+  assignedTeam: { name: string; role?: string }[];
   githubUrl?: string;
   liveUrl?: string;
   stagingUrl?: string;
@@ -173,19 +173,19 @@ export default function ProjectDetailPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-card rounded-lg shadow p-6 border border-border">
+      <div className="bg-white rounded-lg shadow p-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{project.name}</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{project.name}</h1>
             <div className="flex items-center space-x-4 mt-2">
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(project.status)}`}>
                 {project.status}
               </span>
-              <div className="flex items-center text-sm text-muted-foreground">
+              <div className="flex items-center text-sm text-gray-500">
                 <Calendar className="h-4 w-4 mr-1" />
                 Created {new Date(project.createdAt).toLocaleDateString()}
               </div>
-              <div className="flex items-center text-sm text-muted-foreground">
+              <div className="flex items-center text-sm text-gray-500">
                 <Calendar className="h-4 w-4 mr-1" />
                 Updated {new Date(project.updatedAt).toLocaleDateString()}
               </div>
@@ -247,14 +247,14 @@ export default function ProjectDetailPage() {
       )}
 
       {/* Description */}
-      <div className="bg-card rounded-lg shadow p-6 border border-border">
-        <h2 className="text-xl font-semibold text-foreground mb-4">Project Overview</h2>
-        <p className="text-foreground/90 whitespace-pre-wrap">{project.description}</p>
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Project Overview</h2>
+        <p className="text-gray-700 whitespace-pre-wrap">{project.description}</p>
       </div>
 
-      <div className="bg-card rounded-lg shadow p-6 border border-border">
-        <h2 className="text-xl font-semibold text-foreground mb-4">Vault Folder Contents</h2>
-        <ul className="list-disc pl-5 text-foreground/80 space-y-2">
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Vault Folder Contents</h2>
+        <ul className="list-disc pl-5 text-gray-700 space-y-2">
           <li>Login credentials and secure access details for this project.</li>
           <li>Working video walkthroughs for demos, onboarding, and support.</li>
           <li>Git repository link and deployed links for live and staging environments.</li>
@@ -262,8 +262,8 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Tech Stack */}
-      <div className="bg-card rounded-lg shadow p-6 border border-border">
-        <h2 className="text-xl font-semibold text-foreground mb-4">Tech Stack</h2>
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Tech Stack</h2>
         <div className="flex flex-wrap gap-2">
           {project.techStack.map((tech) => (
             <span
@@ -277,22 +277,22 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Links */}
-      <div className="bg-card rounded-lg shadow p-6 border border-border">
-        <h2 className="text-xl font-semibold text-foreground mb-4">Links</h2>
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Links</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {project.githubUrl && (
             <a
               href={project.githubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center p-3 bg-muted rounded-md hover:bg-muted/80 transition-colors"
+              className="flex items-center p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
             >
-              <GitBranch className="h-5 w-5 text-muted-foreground mr-3" />
+              <GitBranch className="h-5 w-5 text-gray-600 mr-3" />
               <div>
-                <p className="font-medium text-foreground">GitHub</p>
-                <p className="text-sm text-muted-foreground">View source code</p>
+                <p className="font-medium text-gray-900">GitHub</p>
+                <p className="text-sm text-gray-600">View source code</p>
               </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground/50 ml-auto" />
+              <ExternalLink className="h-4 w-4 text-gray-400 ml-auto" />
             </a>
           )}
 
@@ -317,14 +317,14 @@ export default function ProjectDetailPage() {
               href={project.stagingUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center p-3 bg-muted rounded-md hover:bg-muted/80 transition-colors"
+              className="flex items-center p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
             >
-              <Server className="h-5 w-5 text-muted-foreground mr-3" />
+              <Server className="h-5 w-5 text-gray-600 mr-3" />
               <div>
-                <p className="font-medium text-foreground">Staging</p>
-                <p className="text-sm text-muted-foreground">View staging environment</p>
+                <p className="font-medium text-gray-900">Staging</p>
+                <p className="text-sm text-gray-600">View staging environment</p>
               </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground/50 ml-auto" />
+              <ExternalLink className="h-4 w-4 text-gray-400 ml-auto" />
             </a>
           )}
         </div>
@@ -341,11 +341,11 @@ export default function ProjectDetailPage() {
                 href={endpoint}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center p-3 bg-muted rounded-md hover:bg-muted/80 transition-colors"
+                className="flex items-center p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
               >
-                <Globe className="h-4 w-4 text-muted-foreground mr-3" />
-                <span className="text-foreground">{endpoint}</span>
-                <ExternalLink className="h-4 w-4 text-muted-foreground/50 ml-auto" />
+                <Globe className="h-4 w-4 text-gray-600 mr-3" />
+                <span className="text-gray-900">{endpoint}</span>
+                <ExternalLink className="h-4 w-4 text-gray-400 ml-auto" />
               </a>
             ))}
           </div>
@@ -353,64 +353,43 @@ export default function ProjectDetailPage() {
       )}
 
       {/* Team */}
-      <div className="bg-card rounded-lg shadow p-6 border border-border">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-foreground">Project Team</h2>
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Users className="h-4 w-4 mr-1" />
-            <span>{project.assignedTeam.length} members</span>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {project.assignedTeam.map((member, index) => (
-            <div key={index} className="flex items-center p-3 bg-muted rounded-md border border-border">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                <span className="text-primary font-bold">{member.user?.name?.charAt(0) || '?'}</span>
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">{member.user?.name || 'Unknown User'}</p>
-                <p className="text-xs text-muted-foreground">
-                  {member.projectRole} <span className="mx-1">•</span> {member.user?.role || 'User'}
-                </p>
-              </div>
-            </div>
-          ))}
-          {project.assignedTeam.length === 0 && (
-            <p className="text-muted-foreground text-sm italic py-2">No team members assigned yet.</p>
-          )}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Team</h2>
+        <div className="flex items-center text-gray-600">
+          <Users className="h-5 w-5 mr-2" />
+          <span>{project.assignedTeam.length} team members assigned</span>
         </div>
       </div>
 
-      <div className="bg-card rounded-lg shadow p-6 border border-border">
-        <h2 className="text-xl font-semibold text-foreground mb-4">Project Folder Summary</h2>
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Project Folder Summary</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          <div className="rounded-lg border border-border bg-muted p-4">
-            <p className="text-sm text-muted-foreground">Credentials</p>
-            <p className="mt-2 text-3xl font-semibold text-foreground">{credentialCount}</p>
-            <p className="text-sm text-muted-foreground/70">Saved for this project</p>
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <p className="text-sm text-gray-500">Credentials</p>
+            <p className="mt-2 text-3xl font-semibold text-gray-900">{credentialCount}</p>
+            <p className="text-sm text-gray-600">Saved for this project</p>
           </div>
-          <div className="rounded-lg border border-border bg-muted p-4">
-            <p className="text-sm text-muted-foreground">Videos</p>
-            <p className="mt-2 text-3xl font-semibold text-foreground">{videoCount}</p>
-            <p className="text-sm text-muted-foreground/70">Uploaded for this project</p>
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <p className="text-sm text-gray-500">Videos</p>
+            <p className="mt-2 text-3xl font-semibold text-gray-900">{videoCount}</p>
+            <p className="text-sm text-gray-600">Uploaded for this project</p>
           </div>
-          <div className="rounded-lg border border-border bg-muted p-4">
-            <p className="text-sm text-muted-foreground">Documents</p>
-            <p className="mt-2 text-3xl font-semibold text-foreground">{documentCount}</p>
-            <p className="text-sm text-muted-foreground/70">Stored in project folder</p>
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <p className="text-sm text-gray-500">Documents</p>
+            <p className="mt-2 text-3xl font-semibold text-gray-900">{documentCount}</p>
+            <p className="text-sm text-gray-600">Stored in project folder</p>
           </div>
-          <div className="rounded-lg border border-border bg-muted p-4">
-            <p className="text-sm text-muted-foreground">Project Updates</p>
-            <p className="mt-2 text-3xl font-semibold text-foreground">{activityCount}</p>
-            <p className="text-sm text-muted-foreground/70">Project-level activity logs</p>
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <p className="text-sm text-gray-500">Project Updates</p>
+            <p className="mt-2 text-3xl font-semibold text-gray-900">{activityCount}</p>
+            <p className="text-sm text-gray-600">Project-level activity logs</p>
           </div>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-card rounded-lg shadow p-6 border border-border">
-        <h2 className="text-xl font-semibold text-foreground mb-4">Manage This Vault</h2>
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Manage This Vault</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link href={`/projects/${project._id}/videos`}>
             <Button variant="outline" className="w-full">

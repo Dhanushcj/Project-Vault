@@ -31,7 +31,7 @@ interface DocumentType {
 
 export default function ProjectDocumentsPage() {
   const params = useParams();
-  const projectId = params.id;
+  const projectId = params.id as string;
   const [documents, setDocuments] = useState<DocumentType[]>([]);
   const [filteredDocuments, setFilteredDocuments] = useState<DocumentType[]>([]);
   const [loading, setLoading] = useState(true);
