@@ -6,7 +6,10 @@ const documentSchema = new mongoose.Schema({
   fileName: { type: String, required: true },
   fileType: { type: String }, // pdf, doc, etc.
   uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  brand: { type: String, required: true, default: 'antigraviity' },
   createdAt: { type: Date, default: Date.now },
 });
+
+documentSchema.index({ brand: 1 });
 
 module.exports = mongoose.model('Document', documentSchema);

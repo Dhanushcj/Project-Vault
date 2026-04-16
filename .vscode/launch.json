@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Next.js: debug",
+      "type": "node",
+      "runtimeVersion": "18",
+      "request": "attach",
+      "protocol": "inspector",
+      "port": 9229,
+      "restart": true,
+      "skipFiles": ["<node_internals>/**"],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Backend: debug",
+      "type": "node",
+      "request": "attach",
+      "protocol": "inspector",
+      "port": 9230,
+      "restart": true,
+      "skipFiles": ["<node_internals>/**"],
+      "cwd": "${workspaceFolder}/backend"
+    }
+  ]
+}

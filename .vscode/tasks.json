@@ -1,0 +1,66 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Backend: Start Dev Server",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev"],
+      "cwd": "${workspaceFolder}/backend",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*nodemon.*",
+          "endsPattern": "^.*listening on port.*|^.*MongoDB connected.*"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "group": "dev"
+      }
+    },
+    {
+      "label": "Frontend: Start Dev Server",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev"],
+      "cwd": "${workspaceFolder}",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*next dev.*",
+          "endsPattern": "^.*(ready|compiled).*"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "group": "dev"
+      }
+    },
+    {
+      "label": "Start Local Development Environment",
+      "dependsOn": ["Backend: Start Dev Server", "Frontend: Start Dev Server"],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}

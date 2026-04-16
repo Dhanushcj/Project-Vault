@@ -1,26 +1,85 @@
 @import "tailwindcss";
+@source "../**/*.{ts,tsx}";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --sidebar: #ffffff;
+  --border: #e2e8f0;
+  --primary: #2563eb;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+  --sidebar: #1e293b;
+  --border: #334155;
+  --primary: #3b82f6;
+  color-scheme: dark;
+}
+
+:root {
+  /* Antigraviity Brand - Stealth Carbon */
+  --antigraviity-primary: #ffffff;
+  --antigraviity-accent: #06b6d4; /* Tech Cyan */
+  --antigraviity-bg-1: #09090b; /* Zinc 950 */
+  --antigraviity-bg-2: #18181b; /* Zinc 900 */
+  --antigraviity-bg-3: #27272a; /* Zinc 800 */
+  
+  /* Forge India Connect Brand */
+  --forge-primary: #f97316;
+  --forge-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mesh-bg {
+  background-color: var(--mesh-fallback, #0f172a);
+  background-image: 
+    radial-gradient(at 0% 0%, var(--mesh-color-1, hsla(253,16%,7%,1)) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, var(--mesh-color-2, hsla(225,39%,30%,1)) 0, transparent 50%), 
+    radial-gradient(at 100% 0%, var(--mesh-color-3, hsla(339,49%,30%,1)) 0, transparent 50%);
+}
+
+@keyframes mesh-pulse {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
+}
+
+.mesh-animate {
+  animation: mesh-pulse 10s infinite ease-in-out;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+@custom-variant dark (&:where(.dark, .dark *));
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s, color 0.3s;
 }

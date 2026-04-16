@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Project Management Platform
+
+A centralized platform for team project management with authentication, project tracking, credentials vault, video documentation, file uploads, and activity logs.
+
+## Features
+
+- 🔐 Authentication & Roles (Admin / Developer / Viewer)
+- 📁 Project Management with tech stack, status, team assignment
+- 🔗 GitHub & Deployment Links
+- 🔑 Secure Credentials Vault with encryption
+- 🎥 Video Documentation (YouTube/Loom)
+- 📂 File & Document Uploads
+- 📊 Dashboard with project overview
+- 🔍 Search & Filter functionality
+- 🧾 Activity Logs
+
+## Tech Stack
+
+- **Frontend:** Next.js 16, TypeScript, Tailwind CSS
+- **Backend:** Express.js, Node.js
+- **Database:** MongoDB
+- **Authentication:** JWT
+- **Encryption:** AES for credentials
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js 18+
+- MongoDB (local or cloud)
+- npm or yarn
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository
+2. Install dependencies for frontend:
+   ```bash
+   cd project-management-platform
+   npm install
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Install dependencies for backend:
+   ```bash
+   cd backend
+   npm install
+   ```
 
-## Learn More
+4. Set up environment variables:
+   - Copy `backend/.env` and update MongoDB URI, JWT secret, encryption key
 
-To learn more about Next.js, take a look at the following resources:
+5. Start MongoDB
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Running the Application
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Start the backend server:
+   ```bash
+   cd backend
+   npm run dev
+   ```
+   Server runs on http://localhost:5000
 
-## Deploy on Vercel
+2. Start the frontend:
+   ```bash
+   cd project-management-platform
+   npm run dev
+   ```
+   App runs on http://localhost:3000
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### First User
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Register an admin user at /register, then change role in database if needed.
+
+## API Endpoints
+
+- POST /api/auth/register - Register user
+- POST /api/auth/login - Login
+- GET /api/projects - Get projects
+- POST /api/projects - Create project
+- GET /api/credentials/:projectId - Get credentials
+- POST /api/credentials - Create credential
+- And more...
+
+## Database Schema
+
+- Users: email, password, role, name
+- Projects: name, description, techStack, status, assignedTeam, links
+- Credentials: projectId, username, encrypted password, notes
+- Videos: projectId, videoUrl, title
+- Documents: projectId, fileUrl, fileName
+- ActivityLog: userId, action, entityType, entityId
+
+## Security
+
+- Passwords hashed with bcrypt
+- Credentials encrypted with AES
+- JWT authentication
+- Role-based access control

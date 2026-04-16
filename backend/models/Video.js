@@ -6,7 +6,10 @@ const videoSchema = new mongoose.Schema({
   title: { type: String },
   description: { type: String },
   uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  brand: { type: String, required: true, default: 'antigraviity' },
   createdAt: { type: Date, default: Date.now },
 });
+
+videoSchema.index({ brand: 1 });
 
 module.exports = mongoose.model('Video', videoSchema);
