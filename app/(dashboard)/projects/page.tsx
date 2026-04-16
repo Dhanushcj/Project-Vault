@@ -57,7 +57,7 @@ export default function ProjectsPage() {
   const fetchProjects = async () => {
     try {
       const response = await api.get('/projects');
-      setProjects(response.data);
+      setProjects(response.data.projects || []);
     } catch (error) {
       console.error('Error fetching projects:', error);
       toast.error('Failed to load projects');

@@ -64,7 +64,8 @@ export default function ProjectActivityPage() {
   const fetchActivities = async () => {
     try {
       const response = await api.get('/activity');
-      const projectEvents = response.data.filter(
+      const logs = response.data.logs || [];
+      const projectEvents = logs.filter(
         (activity: ActivityLog) => activity.entityId === projectId
       );
       setActivities(projectEvents);

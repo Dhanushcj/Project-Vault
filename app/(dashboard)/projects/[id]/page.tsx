@@ -94,7 +94,7 @@ export default function ProjectDetailPage() {
       setDocumentCount(documents.data?.length ?? 0);
       setVideoCount(videos.data?.length ?? 0);
       setCredentialCount(credentials.data?.length ?? 0);
-      const projectActivities = (activities.data as ProjectActivity[] | undefined) ?? [];
+      const projectActivities = (activities.data?.logs as ProjectActivity[] | undefined) ?? [];
       setActivityCount(projectActivities.filter(
         (item) => item.entityType === 'project' && item.entityId === params.id
       ).length);
