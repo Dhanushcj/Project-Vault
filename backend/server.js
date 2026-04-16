@@ -109,6 +109,22 @@ async function seedAdmin() {
   }
 }
 
+// Database Connection Middleware
+app.use(async (req, res, next) => {
+  try {
+    const conn = await connectDB();
+    if (!conn && process.env.NODE_ENV === 'production') {
+      return res.status(503).json({ 
+        message: 'Database connection is still initializing or failed. Please try again in a moment.' 
+      });
+    }
+    next();
+  } catch (err) {
+    console.error('Middleware connection error:', err);
+    res.status(500).json({ message: 'Internal Server Error: Database unavailable' });
+  }
+});
+
 // Routes
 const authRouter = require('./routes/auth');
 const projectsRouter = require('./routes/projects');
