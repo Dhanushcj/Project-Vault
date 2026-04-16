@@ -37,25 +37,54 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
+// MongoDB Connection Cache for Serverless
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
 const connectDB = async () => {
-  if (mongoose.connection.readyState >= 1) return;
-  try {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
     const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/projectdb';
     if (!process.env.MONGODB_URI && !process.env.MONGO_URI && process.env.NODE_ENV === 'production') {
       console.warn('MongoDB connection URI is not defined in production environment');
     }
-    await mongoose.connect(mongoUri);
-    console.log('MongoDB connected');
+
+    const opts = {
+      bufferCommands: false, // Stop the 10-second hang if connection fails
+      serverSelectionTimeoutMS: 5000, // Fail fast (5s) instead of hanging
+      socketTimeoutMS: 45000,
+    };
+
+    console.log('Connecting to MongoDB...');
+    cached.promise = mongoose.connect(mongoUri, opts).then((mongooseInstance) => {
+      console.log('MongoDB connected successfully');
+      return mongooseInstance;
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
     await seedAdmin();
   } catch (err) {
-    console.error('MongoDB connection error:', err);
+    cached.promise = null; // Reset promise so we can retry on next request
+    console.error('Critical MongoDB connection error:', err.message);
+    if (err.stack) console.error(err.stack);
+    
     if (process.env.NODE_ENV === 'production') {
-      throw err; // Fail hard in production
+      // In Vercel, we want to see the error in the logs but not necessarily crash the whole runtime
+      return null;
     }
   }
+
+  return cached.conn;
 };
 
-// Initial connection attempt
+// Start connection but don't await (it will be awaited in the request handler if needed)
 connectDB();
 
 async function seedAdmin() {
