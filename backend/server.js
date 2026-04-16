@@ -170,3 +170,4 @@ if (!process.env.VERCEL) {
 }
 
 module.exports = app;
+// Project Vault Backend v1.1 - Optimized MongoDB Connection for Vercel
