@@ -32,9 +32,9 @@ app.use('/uploads', express.static('uploads'));
 const connectDB = async () => {
   if (mongoose.connection.readyState >= 1) return;
   try {
-    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/projectdb';
-    if (!process.env.MONGO_URI && process.env.NODE_ENV === 'production') {
-      console.warn('MONGO_URI is not defined in production environment');
+    const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/projectdb';
+    if (!process.env.MONGODB_URI && !process.env.MONGO_URI && process.env.NODE_ENV === 'production') {
+      console.warn('MongoDB connection URI is not defined in production environment');
     }
     await mongoose.connect(mongoUri);
     console.log('MongoDB connected');
