@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import api from '@/lib/api';
+import { uploadToCloudinary } from '@/lib/cloudinary';
 import {
   Upload,
   FileText,
@@ -77,26 +78,29 @@ export default function ProjectDocumentsPage() {
     if (!selectedFile || !projectId) return;
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-    formData.append('projectId', projectId);
-
     try {
-      await api.post('/documents', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      // 1. Upload directly to Cloudinary from client
+      const cloudData = await uploadToCloudinary(selectedFile);
+      
+      // 2. Send the URL and metadata to our backend
+      await api.post('/documents', {
+        projectId,
+        fileUrl: cloudData.url,
+        fileName: cloudData.fileName,
+        fileType: cloudData.fileType
       });
+
       toast.success('File uploaded successfully');
       setSelectedFile(null);
       fetchDocuments();
-    } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      toast.error(axiosError.response?.data?.message || 'Failed to upload file');
+    } catch (error: any) {
+      console.error('Upload failed:', error);
+      toast.error(error.message || 'Failed to upload file');
     } finally {
       setUploading(false);
     }
   };
+
 
   const deleteDocument = async (id: string) => {
     if (!confirm('Are you sure you want to delete this document?')) return;

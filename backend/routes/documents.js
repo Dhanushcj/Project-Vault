@@ -35,26 +35,27 @@ router.get('/:projectId', auth, async (req, res) => {
 
 router.post('/', auth, roleCheck(['admin', 'developer']), uploadDocument.single('file'), async (req, res) => {
   try {
-    const { projectId, fileName } = req.body;
+    const { projectId, fileName, fileUrl: providedUrl, fileType: providedType } = req.body;
     const activeBrand = req.headers['x-selected-brand'] || 'antigraviity';
     
-    if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+    // Determine the file URL: either from multer (local/cloudinary storage) or provided directly (client-side upload)
+    const fileUrl = req.file ? req.file.path : providedUrl;
+    
+    if (!fileUrl) {
+      return res.status(400).json({ message: 'No file uploaded or URL provided' });
     }
 
-    // fallback to req.file.path (Cloudinary stores the URL in path)
-    const fileUrl = req.file.path;
-    
     const document = new Document({ 
       projectId, 
       fileUrl, 
-      fileName: fileName || req.file.originalname, 
-      fileType: path.extname(req.file.originalname), 
+      fileName: fileName || (req.file ? req.file.originalname : 'Uploaded Document'), 
+      fileType: providedType || (req.file ? path.extname(req.file.originalname) : '.dat'), 
       uploadedBy: req.user.id,
       brand: activeBrand
     });
     
     await document.save();
+
 
     await new ActivityLog({ 
       userId: req.user.id, 

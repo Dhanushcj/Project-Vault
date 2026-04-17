@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import api from '@/lib/api';
+import { uploadToCloudinary } from '@/lib/cloudinary';
 import {
   Video,
   Play,
@@ -13,8 +14,10 @@ import {
   Plus,
   Search,
   ExternalLink,
+  Upload,
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
+
 
 interface VideoDoc {
   _id: string;
@@ -36,11 +39,14 @@ export default function ProjectVideosPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     url: '',
   });
+
 
   useEffect(() => {
     if (projectId) {
@@ -83,20 +89,42 @@ export default function ProjectVideosPage() {
       return;
     }
 
+    setUploading(true);
     try {
+      let finalUrl = formData.url;
+
+      // 1. If a file is selected, upload to Cloudinary first
+      if (selectedFile) {
+        const cloudData = await uploadToCloudinary(selectedFile);
+        finalUrl = cloudData.url;
+      }
+
+      if (!finalUrl) {
+        toast.error('Please provide a URL or select a file');
+        return;
+      }
+
+      // 2. Post to our backend
       await api.post('/videos', {
         projectId,
-        ...formData,
+        title: formData.title || (selectedFile ? selectedFile.name : ''),
+        description: formData.description,
+        videoUrl: finalUrl,
       });
+
       toast.success('Video added successfully');
       setShowForm(false);
       setFormData({ title: '', description: '', url: '' });
+      setSelectedFile(null);
       fetchVideos();
-    } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      toast.error(axiosError.response?.data?.message || 'Failed to add video');
+    } catch (error: any) {
+      console.error('Video upload failed:', error);
+      toast.error(error.message || 'Failed to add video');
+    } finally {
+      setUploading(false);
     }
   };
+
 
   const deleteVideo = async (id: string) => {
     if (!confirm('Are you sure you want to delete this video?')) return;
@@ -174,15 +202,51 @@ export default function ProjectVideosPage() {
               className="flex min-h-20 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             />
 
-            <Input
-              placeholder="Video URL (YouTube, Vimeo, etc.)"
-              value={formData.url}
-              onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-              required
-            />
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Option 1: Upload Video File</label>
+              <div className="flex items-center space-x-4">
+                <input
+                  type="file"
+                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                  className="hidden"
+                  id="video-file-upload"
+                  accept="video/*"
+                />
+                <label
+                  htmlFor="video-file-upload"
+                  className="flex items-center px-4 py-2 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50 bg-white"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Choose File
+                </label>
+                {selectedFile && <span className="text-sm text-gray-600">{selectedFile.name}</span>}
+              </div>
+            </div>
 
-            <div className="flex space-x-4">
-              <Button type="submit">Add Video</Button>
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-sm font-medium leading-6">
+                <span className="bg-white px-2 text-gray-400 font-normal">OR</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Option 2: Video URL</label>
+              <Input
+                placeholder="Video URL (YouTube, Vimeo, etc.)"
+                value={formData.url}
+                onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                required={!selectedFile}
+              />
+            </div>
+
+            <div className="flex space-x-4 pt-2">
+              <Button type="submit" disabled={uploading}>
+                {uploading ? 'Processing...' : 'Add Video'}
+              </Button>
+
               <Button
                 type="button"
                 variant="outline"

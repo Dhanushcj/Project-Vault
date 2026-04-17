@@ -38,10 +38,10 @@ router.get('/:projectId', auth, async (req, res) => {
 router.post('/', auth, roleCheck(['admin', 'developer', 'viewer']), uploadVideo.single('video'), async (req, res) => {
   const activeBrand = req.headers['x-selected-brand'] || 'antigraviity';
   try {
-    const { projectId, title, description, videoUrl: manualUrl } = req.body;
+    const { projectId, title, description, videoUrl: bodyUrl } = req.body;
     
-    // If a file was uploaded, use its path (which is the Cloudinary URL), otherwise fallback to manualUrl
-    const videoUrl = req.file ? req.file.path : manualUrl;
+    // Use file URL from upload or from request body
+    const videoUrl = req.file ? req.file.path : bodyUrl;
     
     if (!videoUrl) {
       return res.status(400).json({ message: 'Video file or URL is required' });
@@ -57,6 +57,7 @@ router.post('/', auth, roleCheck(['admin', 'developer', 'viewer']), uploadVideo.
     });
     
     await video.save();
+
 
     await new ActivityLog({ 
       userId: req.user.id, 
