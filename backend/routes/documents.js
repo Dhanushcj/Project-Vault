@@ -1,22 +1,12 @@
 const express = require('express');
-const multer = require('multer');
 const path = require('path');
 const Document = require('../models/Document');
 const ActivityLog = require('../models/ActivityLog');
 const { auth, roleCheck } = require('../middleware/auth');
+const { uploadDocument } = require('../lib/cloudinary');
 
 const router = express.Router();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ storage });
 
 // Get documents for a project or all documents
 router.get('/', auth, async (req, res) => {
@@ -43,21 +33,29 @@ router.get('/:projectId', auth, async (req, res) => {
   }
 });
 
-// Upload document
-router.post('/', auth, roleCheck(['admin', 'developer']), upload.single('file'), async (req, res) => {
-  const { projectId, fileName } = req.body;
-  const activeBrand = req.headers['x-selected-brand'] || 'antigraviity';
-  const fileUrl = req.file.path;
-  const document = new Document({ 
-    projectId, 
-    fileUrl, 
-    fileName: fileName || req.file.originalname, 
-    fileType: path.extname(req.file.originalname), 
-    uploadedBy: req.user.id,
-    brand: activeBrand
-  });
+router.post('/', auth, roleCheck(['admin', 'developer']), uploadDocument.single('file'), async (req, res) => {
   try {
+    const { projectId, fileName } = req.body;
+    const activeBrand = req.headers['x-selected-brand'] || 'antigraviity';
+    
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    // fallback to req.file.path (Cloudinary stores the URL in path)
+    const fileUrl = req.file.path;
+    
+    const document = new Document({ 
+      projectId, 
+      fileUrl, 
+      fileName: fileName || req.file.originalname, 
+      fileType: path.extname(req.file.originalname), 
+      uploadedBy: req.user.id,
+      brand: activeBrand
+    });
+    
     await document.save();
+
     await new ActivityLog({ 
       userId: req.user.id, 
       action: 'uploaded document', 

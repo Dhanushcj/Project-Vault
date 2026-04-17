@@ -143,6 +143,13 @@ app.use('/api/videos', videosRouter);
 app.use('/api/documents', documentsRouter);
 app.use('/api/activity', activityRouter);
 
+const { isCloudinaryConfigured } = require('./lib/cloudinary');
+if (isCloudinaryConfigured) {
+  console.log('Cloudinary storage is configured and ready');
+} else {
+  console.warn('WARNING: Cloudinary is not configured. Falling back to local disk storage (Not supported on Vercel)');
+}
+
 // Health check endpoint
 app.get('/api/health', async (req, res) => {
   try {

@@ -1,26 +1,13 @@
 const express = require('express');
-const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const Video = require('../models/Video');
 const ActivityLog = require('../models/ActivityLog');
 const { auth, roleCheck } = require('../middleware/auth');
+const { uploadVideo } = require('../lib/cloudinary');
 
 const router = express.Router();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, 'video-' + Date.now() + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ 
-  storage,
-  limits: { fileSize: 100 * 1024 * 1024 } // 100MB limit
-});
 
 // Get videos for a project or all videos
 router.get('/', auth, async (req, res) => {
@@ -48,13 +35,13 @@ router.get('/:projectId', auth, async (req, res) => {
 });
 
 // Create video
-router.post('/', auth, roleCheck(['admin', 'developer', 'viewer']), upload.single('video'), async (req, res) => {
+router.post('/', auth, roleCheck(['admin', 'developer', 'viewer']), uploadVideo.single('video'), async (req, res) => {
   const activeBrand = req.headers['x-selected-brand'] || 'antigraviity';
   try {
     const { projectId, title, description, videoUrl: manualUrl } = req.body;
     
-    // If a file was uploaded, use its path, otherwise fallback to manualUrl if provided
-    const videoUrl = req.file ? `/uploads/${req.file.filename}` : manualUrl;
+    // If a file was uploaded, use its path (which is the Cloudinary URL), otherwise fallback to manualUrl
+    const videoUrl = req.file ? req.file.path : manualUrl;
     
     if (!videoUrl) {
       return res.status(400).json({ message: 'Video file or URL is required' });
@@ -70,6 +57,7 @@ router.post('/', auth, roleCheck(['admin', 'developer', 'viewer']), upload.singl
     });
     
     await video.save();
+
     await new ActivityLog({ 
       userId: req.user.id, 
       action: 'uploaded video', 
