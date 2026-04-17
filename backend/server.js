@@ -51,39 +51,49 @@ const connectDB = async () => {
   if (!cached.promise) {
     const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/projectdb';
     if (!process.env.MONGODB_URI && !process.env.MONGO_URI && process.env.NODE_ENV === 'production') {
-      console.warn('MongoDB connection URI is not defined in production environment');
+      console.warn('CRITICAL: MongoDB connection URI is not defined in production environment');
     }
 
     const opts = {
-      bufferCommands: false, // Stop the 10-second hang if connection fails
-      serverSelectionTimeoutMS: 5000, // Fail fast (5s) instead of hanging
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 8000, // Increased to 8s for better serverless reliability
       socketTimeoutMS: 45000,
     };
 
-    console.log('Connecting to MongoDB...');
+    console.log('Initiating MongoDB connection...');
     cached.promise = mongoose.connect(mongoUri, opts).then((mongooseInstance) => {
       console.log('MongoDB connected successfully');
       return mongooseInstance;
+    }).catch(err => {
+      cached.promise = null; // reset if failed
+      throw err;
     });
   }
 
   try {
     cached.conn = await cached.promise;
     cached.lastError = null;
-    await seedAdmin();
+    await seedAdmin(); // Always attempt to seed on connection
   } catch (err) {
-    cached.promise = null; // Reset promise so we can retry on next request
+    cached.promise = null; 
     cached.lastError = err.message;
-    console.error('Critical MongoDB connection error:', err.message);
-    if (err.stack) console.error(err.stack);
+    console.error('MongoDB connection error details:', {
+      message: err.message,
+      code: err.code,
+      name: err.name
+    });
     
-    if (process.env.NODE_ENV === 'production') {
-      return null;
+    // Provide user-friendly hints for common Atlas errors
+    if (err.message.includes('MongooseServerSelectionError') || err.message.includes('timeout')) {
+      cached.lastError = 'Connection timeout. This usually means your IP is not whitelisted in MongoDB Atlas.';
+    } else if (err.message.includes('Authentication failed')) {
+      cached.lastError = 'Authentication failed. Please check your MONGODB_URI password.';
     }
   }
 
   return cached.conn;
 };
+
 
 // Start connection but don't await (it will be awaited in the request handler if needed)
 connectDB();

@@ -130,16 +130,33 @@ router.delete('/users/:id', auth, roleCheck(['admin']), async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
+  
   try {
+    // Force a DB connection check if it's the first request or a cold start
+    const User = require('../models/User'); // ensure model is loaded
+    const userCount = await User.countDocuments();
+    
     const user = await User.findOne({ email });
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
+    
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token, user: { id: user._id, name: user.name, role: user.role } });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Login route error:', err);
+    
+    // Check if the error is related to database connection
+    if (err.name === 'MongooseServerSelectionError' || err.message.includes('buffering timed out')) {
+      return res.status(503).json({ 
+        message: 'Database connection failed. Please check if your IP is whitelisted in MongoDB Atlas.',
+        details: err.message
+      });
+    }
+    
+    res.status(500).json({ message: 'Internal Server Error: ' + err.message });
   }
 });
+
 
 module.exports = router;

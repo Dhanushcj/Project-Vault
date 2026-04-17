@@ -46,10 +46,22 @@ export default function LoginForm() {
       toast.success('Login successful!');
       router.push('/dashboard');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed');
+      console.error('Login error:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Login failed';
+      toast.error(errorMessage, {
+        duration: 5000,
+        style: {
+          maxWidth: '500px',
+        }
+      });
+      
+      if (error.response?.data?.details) {
+        console.warn('Detailed error from server:', error.response.data.details);
+      }
     } finally {
       setIsLoading(false);
     }
+
   };
 
   const brandConfig = {
